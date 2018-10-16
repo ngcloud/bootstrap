@@ -116,6 +116,14 @@ exportCluster() {
     --logtostderr --v 2 \
     $1
 }
+setupIAMAuth() {
+  echo "About to setup IAM auth for $1"
+  aws-iam-authenticator init -i $1
+  aws s3 cp cert.pem $2/$1/addons/authenticator/cert.pem;
+  aws s3 cp key.pem $2/$1/addons/authenticator/key.pem;
+  aws s3 cp aws-iam-authenticator.kubeconfig $2/$1/addons/authenticator/kubeconfig.yaml;
+  rm cert.pem key.pem aws-iam-authenticator.kubeconfig
+}
 case "${1:-"script"}" in
   "script")
     createClusterScript ${CLUSTER_NAME} cloudformation
@@ -138,5 +146,8 @@ case "${1:-"script"}" in
   "bastion")
     createBastion ${CLUSTER_NAME}
     updateCluster ${CLUSTER_NAME} "yes"
+  ;;
+  "iam-auth")
+    setupIAMAuth ${CLUSTER_NAME} ${KOPS_STATE_STORE}
   ;;
 esac
