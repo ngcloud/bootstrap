@@ -1,0 +1,318 @@
+apiVersion: v1
+data:
+  calico_backend: bird
+  cni_network_config: |-
+    {
+      "name": "k8s-pod-network",
+      "cniVersion": "0.3.0",
+      "plugins": [
+        {
+          "type": "calico",
+          "etcd_endpoints": "__ETCD_ENDPOINTS__",
+          "log_level": "info",
+          "ipam": {
+            "type": "calico-ipam"
+          },
+          "policy": {
+            "type": "k8s",
+            "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
+            "k8s_auth_token": "__SERVICEACCOUNT_TOKEN__"
+          },
+          "kubernetes": {
+            "kubeconfig": "/etc/cni/net.d/__KUBECONFIG_FILENAME__"
+          }
+        },
+        {
+          "type": "portmap",
+          "snat": true,
+          "capabilities": {"portMappings": true}
+        }
+      ]
+    }
+  etcd_endpoints: http://etcd-a.internal.dev1.k8s.local:4001,http://etcd-b.internal.dev1.k8s.local:4001,http://etcd-c.internal.dev1.k8s.local:4001
+kind: ConfigMap
+metadata:
+  name: calico-config
+  namespace: kube-system
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    role.kubernetes.io/networking: "1"
+  name: calico
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - namespaces
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    role.kubernetes.io/networking: "1"
+  name: calico
+  namespace: kube-system
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    role.kubernetes.io/networking: "1"
+  name: calico
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: calico
+subjects:
+- kind: ServiceAccount
+  name: calico
+  namespace: kube-system
+
+---
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: calico-node
+    role.kubernetes.io/networking: "1"
+  name: calico-node
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: calico-node
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        k8s-app: calico-node
+        role.kubernetes.io/networking: "1"
+    spec:
+      containers:
+      - env:
+        - name: ETCD_ENDPOINTS
+          valueFrom:
+            configMapKeyRef:
+              key: etcd_endpoints
+              name: calico-config
+        - name: CALICO_NETWORKING_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              key: calico_backend
+              name: calico-config
+        - name: CALICO_IPV4POOL_CIDR
+          value: 100.96.0.0/11
+        - name: CALICO_IPV4POOL_IPIP
+          value: always
+        - name: CLUSTER_TYPE
+          value: kops,bgp
+        - name: CALICO_DISABLE_FILE_LOGGING
+          value: "true"
+        - name: CALICO_K8S_NODE_REF
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: IP
+          value: ""
+        - name: FELIX_IPV6SUPPORT
+          value: "false"
+        - name: FELIX_LOGSEVERITYSCREEN
+          value: info
+        - name: FELIX_PROMETHEUSMETRICSENABLED
+          value: "false"
+        - name: FELIX_PROMETHEUSMETRICSPORT
+          value: "9091"
+        - name: FELIX_PROMETHEUSGOMETRICSENABLED
+          value: "true"
+        - name: FELIX_PROMETHEUSPROCESSMETRICSENABLED
+          value: "true"
+        - name: FELIX_HEALTHENABLED
+          value: "true"
+        image: quay.io/calico/node:v2.6.7
+        name: calico-node
+        resources:
+          requests:
+            cpu: 10m
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /var/run/calico
+          name: var-run-calico
+          readOnly: false
+        - mountPath: /etc/hosts
+          name: etc-hosts
+          readOnly: true
+      - command:
+        - /install-cni.sh
+        env:
+        - name: CNI_CONF_NAME
+          value: 10-calico.conflist
+        - name: ETCD_ENDPOINTS
+          valueFrom:
+            configMapKeyRef:
+              key: etcd_endpoints
+              name: calico-config
+        - name: CNI_NETWORK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: cni_network_config
+              name: calico-config
+        image: quay.io/calico/cni:v1.11.2
+        imagePullPolicy: Always
+        name: install-cni
+        resources:
+          requests:
+            cpu: 10m
+        volumeMounts:
+        - mountPath: /host/opt/cni/bin
+          name: cni-bin-dir
+        - mountPath: /host/etc/cni/net.d
+          name: cni-net-dir
+        - mountPath: /etc/hosts
+          name: etc-hosts
+          readOnly: true
+      hostNetwork: true
+      serviceAccountName: calico
+      terminationGracePeriodSeconds: 0
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /lib/modules
+        name: lib-modules
+      - hostPath:
+          path: /var/run/calico
+        name: var-run-calico
+      - hostPath:
+          path: /opt/cni/bin
+        name: cni-bin-dir
+      - hostPath:
+          path: /etc/cni/net.d
+        name: cni-net-dir
+      - hostPath:
+          path: /etc/hosts
+        name: etc-hosts
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: calico-kube-controllers
+    role.kubernetes.io/networking: "1"
+  name: calico-kube-controllers
+  namespace: kube-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        k8s-app: calico-kube-controllers
+        role.kubernetes.io/networking: "1"
+      name: calico-kube-controllers
+      namespace: kube-system
+    spec:
+      containers:
+      - env:
+        - name: ENABLED_CONTROLLERS
+          value: policy,profile,workloadendpoint,node
+        - name: ETCD_ENDPOINTS
+          valueFrom:
+            configMapKeyRef:
+              key: etcd_endpoints
+              name: calico-config
+        image: quay.io/calico/kube-controllers:v1.0.3
+        name: calico-kube-controllers
+        resources:
+          requests:
+            cpu: 10m
+      hostNetwork: true
+      serviceAccountName: calico
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - key: CriticalAddonsOnly
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /etc/hosts
+        name: etc-hosts
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: calico-policy
+  name: calico-policy-controller
+  namespace: kube-system
+spec:
+  replicas: 0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        k8s-app: calico-policy
+      name: calico-policy-controller
+      namespace: kube-system
+    spec:
+      containers:
+      - env:
+        - name: ETCD_ENDPOINTS
+          valueFrom:
+            configMapKeyRef:
+              key: etcd_endpoints
+              name: calico-config
+        image: quay.io/calico/kube-policy-controller:v0.7.0
+        name: calico-policy-controller
+        volumeMounts:
+        - mountPath: /etc/hosts
+          name: etc-hosts
+          readOnly: true
+      hostNetwork: true
+      serviceAccountName: calico
+      volumes:
+      - hostPath:
+          path: /etc/hosts
+        name: etc-hosts

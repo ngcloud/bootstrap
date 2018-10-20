@@ -1,0 +1,84 @@
+apiVersion: kops/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: 2018-10-19T21:06:35Z
+  name: dev1.k8s.local
+spec:
+  api:
+    loadBalancer:
+      type: Internal
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudLabels:
+    Purpose: Dev
+    Team: Dev
+  cloudProvider: aws
+  configBase: s3://dev-ngcloud-bucket/dev1.k8s.local
+  dnsZone: k8s.local
+  etcdClusters:
+  - etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-eu-west-2a
+      name: a
+    - encryptedVolume: true
+      instanceGroup: master-eu-west-2b
+      name: b
+    - encryptedVolume: true
+      instanceGroup: master-eu-west-2c
+      name: c
+    name: main
+  - etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-eu-west-2a
+      name: a
+    - encryptedVolume: true
+      instanceGroup: master-eu-west-2b
+      name: b
+    - encryptedVolume: true
+      instanceGroup: master-eu-west-2c
+      name: c
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  kubernetesVersion: 1.12.0
+  masterPublicName: api.dev1.k8s.local
+  networkCIDR: 172.20.0.0/16
+  networking:
+    calico: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  subnets:
+  - cidr: 172.20.32.0/19
+    name: eu-west-2a
+    type: Private
+    zone: eu-west-2a
+  - cidr: 172.20.64.0/19
+    name: eu-west-2b
+    type: Private
+    zone: eu-west-2b
+  - cidr: 172.20.96.0/19
+    name: eu-west-2c
+    type: Private
+    zone: eu-west-2c
+  - cidr: 172.20.0.0/22
+    name: utility-eu-west-2a
+    type: Utility
+    zone: eu-west-2a
+  - cidr: 172.20.4.0/22
+    name: utility-eu-west-2b
+    type: Utility
+    zone: eu-west-2b
+  - cidr: 172.20.8.0/22
+    name: utility-eu-west-2c
+    type: Utility
+    zone: eu-west-2c
+  topology:
+    dns:
+      type: Private
+    masters: private
+    nodes: private
