@@ -1,5 +1,7 @@
 [![Build Status](https://dev.azure.com/ngcloud/creator/_apis/build/status/ngcloud.bootstrap)](https://dev.azure.com/ngcloud/creator/_build/latest?definitionId=1)
 
+[![Docker Repository on Quay](https://quay.io/repository/ngcloud/creator/status "Docker Repository on Quay")](https://quay.io/repository/ngcloud/creator)
+
 # ngcloud
 
 ngcloud is coming soon
