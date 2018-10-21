@@ -5,30 +5,31 @@ ENV HELM_VERSION=2.11.0 \
     AWS_IAM_AUTH_VERSION=0.3.0
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 ARG aquaToken
-RUN yum -y install \
-           file \
-           findutils \
-           gcc \
-           git \
-           iproute \
-           iputils \
-           less \
-           make \
-           net-tools \
-           passwd \
-           tar \
-           vim-enhanced \
-           wget \
-           which \
-           docker \
-           python-docker-py \
-           docker-selinux \
-           kubernetes-client \
-           gdb-gdbserver \
-           bash-completion \
-           yum-utils \
-           && yum clean all \
-           && rm -rf /var/cache/yum
+RUN yum update -y && yum -y install \
+      curl \
+      file \
+      findutils \
+      gcc \
+      git \
+      iproute \
+      iputils \
+      less \
+      make \
+      net-tools \
+      passwd \
+      tar \
+      vim-enhanced \
+      wget \
+      which \
+      docker \
+      python-docker-py \
+      docker-selinux \
+      kubernetes-client \
+      gdb-gdbserver \
+      bash-completion \
+      yum-utils \
+      && yum clean all \
+      && rm -rf /var/cache/yum
 
 # Install helm
 RUN mkdir -p /usr/share/helm && curl -fsSL "https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar -xzC /usr/share/helm --strip-components=1 \
