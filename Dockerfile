@@ -24,6 +24,7 @@ RUN yum update -y && yum -y install \
       docker \
       python-docker-py \
       docker-selinux \
+      kernel-headers \
       kubernetes-client \
       gdb-gdbserver \
       bash-completion \
