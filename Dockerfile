@@ -4,7 +4,7 @@ LABEL author="Team ngcloud <prabhu.subramanian@gmail.com>"
 ENV HELM_VERSION=2.11.0 \
     AWS_IAM_AUTH_VERSION=0.3.0
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
-
+ARG aquaToken
 RUN yum -y install \
            file \
            findutils \
