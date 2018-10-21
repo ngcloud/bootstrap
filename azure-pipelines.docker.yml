@@ -5,7 +5,7 @@ variables:
   imageName: 'ngcloud/creator:$(build.buildId)'
 
 steps:
-- script: docker build --build-arg=aquaToken=$(aquaToken) -f Dockerfile -t $(imageName) --no-cache .
+- script: docker build --build-arg aquaToken=$(aquaToken) -f Dockerfile -t $(imageName) --no-cache .
   displayName: 'docker build'
 - script: |
     docker login -u $(dockerId) -p $(dockerPassword)
