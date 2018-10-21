@@ -62,4 +62,10 @@ RUN cd /home/ngcloud \
   && git clone https://github.com/ngcloud/bootstrap.git \
   && chmod +x /home/ngcloud/bootstrap/scripts/*.sh
 
+RUN apk add --no-cache ca-certificates && update-ca-certificates \
+    && wget -O /usr/local/bin/microscanner https://get.aquasec.com/microscanner \
+    && chmod +x /usr/local/bin/microscanner \
+    && /usr/local/bin/microscanner ${aquaToken} \
+    && rm -rf /usr/local/bin/microscanner
+
 CMD ["/usr/bin/bash"]
