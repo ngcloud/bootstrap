@@ -18,6 +18,7 @@ RUN yum -y install \
            passwd \
            tar \
            vim-enhanced \
+           wget \
            which \
            docker \
            python-docker-py \
@@ -62,7 +63,7 @@ RUN cd /home/ngcloud \
   && git clone https://github.com/ngcloud/bootstrap.git \
   && chmod +x /home/ngcloud/bootstrap/scripts/*.sh
 
-RUN wget -O /usr/local/bin/microscanner https://get.aquasec.com/microscanner \
+RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
     && chmod +x /usr/local/bin/microscanner \
     && /usr/local/bin/microscanner ${aquaToken} \
     && rm -rf /usr/local/bin/microscanner
