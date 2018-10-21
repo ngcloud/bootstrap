@@ -57,7 +57,7 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" \
 
 RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
     && chmod +x /usr/local/bin/microscanner \
-    && if [[ ${aquaToken} ]]; then /usr/local/bin/microscanner ${aquaToken}; fi \
+    && /usr/local/bin/microscanner $aquaToken \
     && rm -rf /usr/local/bin/microscanner
 
 RUN useradd -u 1001 -m -d /home/ngcloud -s /bin/bash ngcloud
