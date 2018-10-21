@@ -8,7 +8,7 @@ ENV HELM_VERSION=2.11.0 \
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 ARG aquaToken
 
-RUN apk --update add --no-cache python3 zip tar make wget curl git openssh-client \
+RUN apk --update add --no-cache python py-pip zip tar make bash wget curl git openssh-client \
     && rm -rf /var/lib/apt/lists/*
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
@@ -36,11 +36,8 @@ RUN curl -LO https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/d
   && mv ./heptio-authenticator-aws_${AWS_IAM_AUTH_VERSION}_linux_amd64 /usr/local/bin/aws-iam-authenticator
 
 # Install awscli
-RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" \
-  && python get-pip.py \
-  && pip install awscli aws-shell \
-  && pip install --upgrade pip \
-  && rm get-pip.py
+RUN pip install awscli aws-shell \
+  && pip install --upgrade pip
 
 # Install terraform
 RUN curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip \
@@ -55,7 +52,7 @@ RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner"
   && rm -rf /usr/local/bin/microscanner
 
 # Run as ngcloud user
-RUN useradd -u 1001 -m -d /home/ngcloud -s /bin/bash ngcloud
+RUN adduser -u 1001 -D -h /home/ngcloud -s /bin/bash ngcloud
 USER ngcloud
 
 # Clone bootstrap scripts to have it ready
