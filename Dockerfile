@@ -8,7 +8,7 @@ ENV HELM_VERSION=2.11.0 \
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 ARG aquaToken
 
-RUN apk --update add --no-cache python py-pip zip tar make bash wget curl git openssh-client \
+RUN apk --update add --no-cache python3 py3-pip zip tar make bash wget curl git openssh-client \
     && rm -rf /var/lib/apt/lists/*
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
@@ -36,8 +36,8 @@ RUN curl -LO https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/d
   && mv ./heptio-authenticator-aws_${AWS_IAM_AUTH_VERSION}_linux_amd64 /usr/local/bin/aws-iam-authenticator
 
 # Install awscli
-RUN pip install awscli aws-shell \
-  && pip install --upgrade pip
+RUN pip3 install --upgrade pip \
+  && pip3 install awscli aws-shell
 
 # Install terraform
 RUN curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip \

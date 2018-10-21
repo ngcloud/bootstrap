@@ -2,7 +2,7 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  imageName: 'ngcloud/creator:$(build.buildId)'
+  imageName: 'ngcloud/creator'
 
 steps:
 - script: docker build --build-arg aquaToken=$(aquaToken) -f Dockerfile -t $(imageName) --no-cache .
@@ -10,6 +10,7 @@ steps:
 - script: |
     docker login -u $(dockerId) -p $pswd
     docker push $(imageName)
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   env:
     pswd: $(dockerPassword)  
   displayName: 'docker push'
