@@ -1,36 +1,21 @@
-FROM centos:centos7
+FROM alpine
 LABEL author="Team ngcloud <prabhu.subramanian@gmail.com>"
 
 ENV HELM_VERSION=2.11.0 \
-    AWS_IAM_AUTH_VERSION=0.3.0
+    AWS_IAM_AUTH_VERSION=0.3.0 \
+    TF_VERSION=0.11.9
+
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 ARG aquaToken
-RUN yum update -y && yum -y install \
-      curl \
-      file \
-      findutils \
-      gcc \
-      git \
-      iproute \
-      iputils \
-      less \
-      make \
-      net-tools \
-      passwd \
-      tar \
-      vim-enhanced \
-      wget \
-      which \
-      docker \
-      python-docker-py \
-      docker-selinux \
-      kernel-headers \
-      kubernetes-client \
-      gdb-gdbserver \
-      bash-completion \
-      yum-utils \
-      && yum clean all \
-      && rm -rf /var/cache/yum
+
+RUN apk --update add --no-cache python3 zip tar wget curl git openssh-client \
+    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
+# Setup kubectl
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
+  && chmod +x ./kubectl \
+  && mv ./kubectl /usr/local/bin/kubectl
 
 # Install helm
 RUN mkdir -p /usr/share/helm && curl -fsSL "https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar -xzC /usr/share/helm --strip-components=1 \
@@ -57,11 +42,19 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" \
   && pip install --upgrade pip \
   && rm get-pip.py
 
-RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
-    && chmod +x /usr/local/bin/microscanner \
-    && /usr/local/bin/microscanner $aquaToken \
-    && rm -rf /usr/local/bin/microscanner
+# Install terraform
+RUN curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip \
+  && unzip terraform_${TF_VERSION}_linux_amd64.zip -d /usr/local/bin \
+  && chmod +x /usr/local/bin/terraform \
+  && rm terraform_${TF_VERSION}_linux_amd64.zip
 
+# Scan with aqua
+RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
+  && chmod +x /usr/local/bin/microscanner \
+  && /usr/local/bin/microscanner $aquaToken \
+  && rm -rf /usr/local/bin/microscanner
+
+# Run as ngcloud user
 RUN useradd -u 1001 -m -d /home/ngcloud -s /bin/bash ngcloud
 USER ngcloud
 
