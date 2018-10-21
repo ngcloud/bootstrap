@@ -1,13 +1,32 @@
-
 [![Build Status](https://dev.azure.com/ngcloud/creator/_apis/build/status/ngcloud.bootstrap)](https://dev.azure.com/ngcloud/creator/_build/latest?definitionId=1)
 
-AWS setup
+# ngcloud
+
+ngcloud is coming soon
+
+## Quick start
+
+Bootstrap scripts are available as a docker image. Simply pull the image and run the image by mounting your ssh and aws credentials directory.
 
 ```bash
-./scripts/aws-setup.sh create
-./scripts/aws-setup.sh bastion
+docker pull ngcloud/creator
+docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator
+```
+
+Continue with the cloud creation from within the docker bash shell
+
+```bash
+cd ~/bootstrap/scripts
+# vi aws-setup.sh and configure
+./aws-setup.sh create # Get a coffee or two
+./aws-setup.sh bastion # Save the config without any change to proceed
 ```
 
 ```bash
-./scripts/aws-setup.sh iam-auth
+./aws-setup.sh iam-auth
 ```
+
+## Power users
+
+For users not willing to use the creator docker image follow the instructions in [power users](https://github.com/ngcloud/bootstrap/blob/master/docs/power_users.md) to setup your computer or vm
+

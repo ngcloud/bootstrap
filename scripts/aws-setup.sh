@@ -124,6 +124,10 @@ setupIAMAuth() {
   aws s3 cp aws-iam-authenticator.kubeconfig $2/$1/addons/authenticator/kubeconfig.yaml;
   rm cert.pem key.pem aws-iam-authenticator.kubeconfig
 }
+validateCluster() {
+  kops validate cluster --name $1 \
+    --state=$2
+}
 case "${1:-"script"}" in
   "script")
     createClusterScript ${CLUSTER_NAME} cloudformation
@@ -149,5 +153,8 @@ case "${1:-"script"}" in
   ;;
   "iam-auth")
     setupIAMAuth ${CLUSTER_NAME} ${KOPS_STATE_STORE}
+  ;;
+  "validate")
+    validateCluster ${CLUSTER_NAME} ${KOPS_STATE_STORE}
   ;;
 esac

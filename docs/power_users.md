@@ -1,6 +1,6 @@
 # Kubernetes creation machine - pre-requisites
 
-We use kops to create a bespoke Kubernetes cluster for ngcloud.
+This is for users not willing to use the creator docker image. We use kops to create a bespoke Kubernetes cluster for ngcloud.
 
 Install kubectl
 
@@ -13,7 +13,7 @@ sudo mv ./kubectl /usr/local/bin/kubectl
 Install helm with tiller
 
 ```bash
-HELM_VERSION=2.11.0-rc.3
+HELM_VERSION=2.11.0
 curl -fsSL "https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar -xzC /usr/share/helm --strip-components=1
 cp /usr/share/helm/* /usr/local/bin/ \
   && chmod +x /usr/local/bin/helm \

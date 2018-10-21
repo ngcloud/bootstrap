@@ -1,71 +1,30 @@
 FROM centos:centos7
-LABEL author="ngcloud <prabhu.subramanian@gmail.com>"
+LABEL author="Team ngcloud <prabhu.subramanian@gmail.com>"
 
-ENV HELM_VERSION=2.11.0
-LABEL RUN="docker run -it --name NAME -e NAME=NAME IMAGE"
+ENV HELM_VERSION=2.11.0 \
+    AWS_IAM_AUTH_VERSION=0.3.0
+LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 
 RUN yum -y install \
-           kernel \
-           e2fsprogs \
-           sos \
-           crash \
-           strace \
-           ltrace \
-           tcpdump \
-           abrt \
-           pcp \
-           systemtap \
-           perf \
-           bc \
-           blktrace \
-           btrfs-progs \
-           ethtool \
            file \
            findutils \
            gcc \
-           gdb \
            git \
-           glibc-common \
-           glibc-utils \
-           hwloc \
-           iotop \
            iproute \
            iputils \
            less \
-           pciutils \
-           ltrace \
-           mailx \
-           man-db \
-           nc \
-           netsniff-ng \
+           make \
            net-tools \
-           numactl \
-           numactl-devel \
            passwd \
-           perf \
-           procps-ng \
-           psmisc \
-           screen \
-           strace \
-           sysstat \
-           systemtap-client \
            tar \
-           tcpdump \
            vim-enhanced \
-           xauth \
            which \
-           ostree \
-           rpm-ostree \
            docker \
            python-docker-py \
            docker-selinux \
            kubernetes-client \
            gdb-gdbserver \
-           vim-minimal \
            bash-completion \
-           subscription-manager \
-           python-rhsm \
-           rootfiles \
            yum-utils \
            && yum clean all \
            && rm -rf /var/cache/yum
@@ -75,7 +34,8 @@ RUN mkdir -p /usr/share/helm && curl -fsSL "https://storage.googleapis.com/kuber
   && cp /usr/share/helm/* /usr/local/bin/ \
   && chmod +x /usr/local/bin/helm \
   && chmod +x /usr/local/bin/tiller \
-  && helm init --client-only
+  && helm init --client-only \
+  && helm plugin install https://github.com/hypnoglow/helm-s3.git
 
 # Install kops
 RUN curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64 \
@@ -83,15 +43,23 @@ RUN curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s http
   && mv kops-linux-amd64 /usr/local/bin/kops
 
 # Install aws iam authenticator
-RUN curl -LO https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.3.0/heptio-authenticator-aws_0.3.0_linux_amd64 \
-  && chmod +x heptio-authenticator-aws_0.3.0_linux_amd64 \
-  && mv ./heptio-authenticator-aws_0.3.0_linux_amd64 /usr/local/bin/aws-iam-authenticator
+RUN curl -LO https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${AWS_IAM_AUTH_VERSION}/heptio-authenticator-aws_${AWS_IAM_AUTH_VERSION}_linux_amd64 \
+  && chmod +x heptio-authenticator-aws_${AWS_IAM_AUTH_VERSION}_linux_amd64 \
+  && mv ./heptio-authenticator-aws_${AWS_IAM_AUTH_VERSION}_linux_amd64 /usr/local/bin/aws-iam-authenticator
+
+# Install awscli
+RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" \
+  && python get-pip.py \
+  && pip install awscli aws-shell \
+  && pip install --upgrade pip \
+  && rm get-pip.py
 
 RUN useradd -u 1001 -m -d /home/ngcloud -s /bin/bash ngcloud
 USER ngcloud
 
 # Clone bootstrap scripts to have it ready
 RUN cd /home/ngcloud \
-  && git clone https://github.com/ngcloud/bootstrap.git
+  && git clone https://github.com/ngcloud/bootstrap.git \
+  && chmod +x /home/ngcloud/bootstrap/scripts/*.sh
 
 CMD ["/usr/bin/bash"]
