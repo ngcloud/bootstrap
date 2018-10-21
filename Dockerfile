@@ -55,9 +55,6 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" \
   && pip install --upgrade pip \
   && rm get-pip.py
 
-RUN useradd -u 1001 -m -d /home/ngcloud -s /bin/bash ngcloud
-USER ngcloud
-
 # Clone bootstrap scripts to have it ready
 RUN cd /home/ngcloud \
   && git clone https://github.com/ngcloud/bootstrap.git \
@@ -65,7 +62,10 @@ RUN cd /home/ngcloud \
 
 RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
     && chmod +x /usr/local/bin/microscanner \
-    && /usr/local/bin/microscanner ${aquaToken} \
+    && if [[ -e ${aquaToken} ]]; then /usr/local/bin/microscanner ${aquaToken}; fi \
     && rm -rf /usr/local/bin/microscanner
+
+RUN useradd -u 1001 -m -d /home/ngcloud -s /bin/bash ngcloud
+USER ngcloud
 
 CMD ["/usr/bin/bash"]
