@@ -8,7 +8,7 @@ ENV HELM_VERSION=2.11.0 \
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 ARG aquaToken
 
-RUN apk --update add --no-cache python3 zip tar wget curl git openssh-client \
+RUN apk --update add --no-cache python3 zip tar make wget curl git openssh-client \
     && rm -rf /var/lib/apt/lists/*
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
