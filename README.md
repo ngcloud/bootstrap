@@ -29,3 +29,7 @@ cd ~/bootstrap/scripts
 ## Power users
 
 For users not willing to use the creator docker image follow the instructions in [power users](https://github.com/ngcloud/bootstrap/blob/master/docs/power_users.md) to setup your computer or vm
+
+## Support/question/discussion
+
+We use [Discord](https://discord.gg/BamQKyp) for chat. GitHub issues is also best.
