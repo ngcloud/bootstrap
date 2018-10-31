@@ -7,7 +7,7 @@ ENV AWS_IAM_AUTH_VERSION=0.3.0 \
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 ARG aquaToken
 
-RUN apk --update add --no-cache python3 py3-pip zip tar make bash wget curl git openssh-client \
+RUN apk --update add --no-cache python3 py3-pip zip tar make bash wget curl git openssl openssh-client \
     && rm -rf /var/lib/apt/lists/*
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
