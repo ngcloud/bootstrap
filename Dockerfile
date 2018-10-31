@@ -1,8 +1,7 @@
 FROM alpine
 LABEL author="Team ngcloud <prabhu.subramanian@gmail.com>"
 
-ENV HELM_VERSION=2.11.0 \
-    AWS_IAM_AUTH_VERSION=0.3.0 \
+ENV AWS_IAM_AUTH_VERSION=0.3.0 \
     TF_VERSION=0.11.9
 
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
@@ -18,8 +17,7 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s
   && mv ./kubectl /usr/local/bin/kubectl
 
 # Install helm
-RUN mkdir -p /usr/share/helm && curl -fsSL "https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar -xzC /usr/share/helm --strip-components=1 \
-  && cp /usr/share/helm/* /usr/local/bin/ \
+RUN mkdir -p /usr/share/helm && curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash \
   && chmod +x /usr/local/bin/helm \
   && chmod +x /usr/local/bin/tiller \
   && helm init --client-only \
