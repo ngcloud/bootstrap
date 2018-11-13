@@ -4,8 +4,13 @@ pool:
 variables:
   coreImageName: 'ngcloud/cloud-tools'
   imageName: 'ngcloud/creator'
-
+  notaryVersion: '0.6.1'
 steps:
+- script: |
+    curl -LO https://github.com/theupdateframework/notary/releases/download/v$(notaryVersion)/notary-Linux-amd64
+    chmod +x notary-Linux-amd64
+    mv notary-Linux-amd64 /usr/local/bin/
+  displayName: 'Install build tools'
 - script: docker build --build-arg aquaToken=$(aquaToken) -f Dockerfile-tools -t $(coreImageName) --no-cache .
   displayName: 'NgCloud cloud tools docker build'
 - script: docker build -f Dockerfile -t $(imageName) --no-cache .
