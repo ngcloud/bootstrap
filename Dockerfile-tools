@@ -1,8 +1,8 @@
 FROM alpine
-LABEL author="Team ngcloud <prabhu.subramanian@gmail.com>"
+LABEL author="Team ngcloud <hello@ngcloud.io>"
 
 ENV AWS_IAM_AUTH_VERSION=0.3.0 \
-    TF_VERSION=0.11.9
+    TF_VERSION=0.11.10
 
 ARG aquaToken
 

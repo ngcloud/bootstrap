@@ -130,7 +130,7 @@ validateCluster() {
 }
 case "${1:-"script"}" in
   "script")
-    createClusterScript ${CLUSTER_NAME} cloudformation
+    createClusterScript ${CLUSTER_NAME} terraform
   ;;
   "dry-run")
     createClusterScript ${CLUSTER_NAME} $1
