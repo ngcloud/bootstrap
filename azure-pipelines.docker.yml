@@ -2,24 +2,27 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
+  toolsVersion: '1.0.0'
   coreImageName: 'ngcloud/cloud-tools'
+  awsImageName: 'ngcloud/aws-tools'
+  azureImageName: 'ngcloud/azure-tools'
   imageName: 'ngcloud/creator'
   notaryVersion: '0.6.1'
+  buildDate: $(Date:yyyy-MM-dd)
 steps:
-- script: |
-    curl -LO https://github.com/theupdateframework/notary/releases/download/v$(notaryVersion)/notary-Linux-amd64
-    chmod +x notary-Linux-amd64
-    mv notary-Linux-amd64 $(Agent.ToolsDirectory)/notary
-  displayName: 'Install build tools'
-- script: docker build --build-arg aquaToken=$(aquaToken) -f Dockerfile-tools -t $(coreImageName) --no-cache .
-  displayName: 'NgCloud cloud tools docker build'
+- script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE=$(buildDate) -f Dockerfile-tools -t $(coreImageName) --no-cache .
+  displayName: 'NgCloud core tools docker build'
+- script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE=$(buildDate) -f Dockerfile-aws -t $(awsImageName) --no-cache .
+  displayName: 'NgCloud aws tools docker build'
+- script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE=$(buildDate) -f Dockerfile-azure -t $(azureImageName) --no-cache .
+  displayName: 'NgCloud azure tools docker build'
 - script: docker build -f Dockerfile -t $(imageName) --no-cache .
-  displayName: 'NgCloud Creator docker build'
+  displayName: 'NgCloud Creator docker build (AWS)'
 - script: |
     docker login -u $(dockerId) -p $pswd
     docker push $(coreImageName)
     docker push $(imageName)
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   env:
     pswd: $(dockerPassword)  
-  displayName: 'Push docker containers'
+  displayName: 'Push docker containers for master branch builds'

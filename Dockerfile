@@ -1,4 +1,4 @@
-FROM ngcloud/cloud-tools
+FROM ngcloud/aws-tools
 LABEL author="Team ngcloud <hello@ngcloud.io>"
 
 LABEL RUN="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"

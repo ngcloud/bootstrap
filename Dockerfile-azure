@@ -1,0 +1,13 @@
+FROM microsoft/azure-cli
+LABEL author="Team ngcloud <hello@ngcloud.io>"
+
+ARG aquaToken
+
+# Install azure cli
+RUN curl -L https://aka.ms/InstallAzureCli | bash
+
+# Scan with aqua
+RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
+  && chmod +x /usr/local/bin/microscanner \
+  && /usr/local/bin/microscanner $aquaToken \
+  && rm -rf /usr/local/bin/microscanner
