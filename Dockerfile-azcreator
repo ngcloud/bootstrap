@@ -1,9 +1,7 @@
-FROM microsoft/azure-cli
-LABEL author="Team ngcloud <hello@ngcloud.io>"
+FROM ngcloud/azure-tools
 
 ARG CLI_VERSION
 ARG BUILD_DATE
-ARG aquaToken
 
 LABEL maintainer="ngCloud" \
       org.label-schema.schema-version="1.0" \
@@ -18,8 +16,13 @@ LABEL maintainer="ngCloud" \
       org.label-schema.vcs-url="https://github.com/ngcloud/bootstrap.git" \
       org.label-schema.docker.cmd="docker run -it --name ngcloud-creator -v ~/.azure:/home/ngcloud/.azure ngcloud/azure-creator"
 
-# Scan with aqua
-RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
-  && chmod +x /usr/local/bin/microscanner \
-  && /usr/local/bin/microscanner $aquaToken \
-  && rm -rf /usr/local/bin/microscanner
+# Run as ngcloud user
+RUN adduser -u 1001 -D -h /home/ngcloud -s /bin/bash ngcloud
+USER ngcloud
+
+# Clone bootstrap scripts to have it ready
+RUN cd /home/ngcloud \
+  && git clone https://github.com/ngcloud/bootstrap.git \
+  && chmod +x /home/ngcloud/bootstrap/scripts/*.sh
+
+CMD ["/usr/bin/bash"]

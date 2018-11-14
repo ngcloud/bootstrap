@@ -7,7 +7,7 @@ ARG aquaToken
 LABEL maintainer="ngCloud" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.vendor="ngCloud" \
-      org.label-schema.name="cloud tools" \
+      org.label-schema.name="aws tools" \
       org.label-schema.version=$CLI_VERSION \
       org.label-schema.license="MIT" \
       org.label-schema.description="Container with essential tools for creating and managing Kubernetes cluster on aws using kops" \
