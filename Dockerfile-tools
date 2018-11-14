@@ -16,6 +16,8 @@ LABEL maintainer="ngCloud" \
       org.label-schema.vcs-url="https://github.com/ngcloud/bootstrap.git" \
       org.label-schema.docker.cmd=""
 
+ENV TF_VERSION=0.11.10
+
 RUN apk --update add --no-cache python3 py3-pip zip tar make bash wget curl git openssl openssh-client \
     && rm -rf /var/lib/apt/lists/*
 RUN apk add --no-cache ca-certificates && update-ca-certificates
