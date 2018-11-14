@@ -37,6 +37,7 @@ jobs:
     displayName: 'Set build variables'  
   - script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-tools -t $(coreImageName) --no-cache .
     displayName: 'NgCloud core tools docker build'
+
 - job: BuildAWS
   dependsOn: BuildCore
   displayName: 'Build aws container'
@@ -47,6 +48,7 @@ jobs:
     displayName: 'NgCloud aws tools docker build'
   - script: docker build --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile -t $(awsCreatorName) --no-cache .
     displayName: 'NgCloud Creator docker build (AWS)'
+
 - job: BuildAzure
   dependsOn: BuildCore
   displayName: 'Build azure container'
@@ -68,9 +70,10 @@ jobs:
       docker login -u $(dockerId) -p $pswd
       docker push $(coreImageName)
     displayName: 'Push docker containers for core cloud tools'
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
-  env:
-    pswd: $(dockerPassword)
+    env:
+      pswd: $(dockerPassword)
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))  
+
 - job: PublishAWS
   dependsOn: PublishCore
   displayName: 'Publish AWS container'
@@ -81,6 +84,7 @@ jobs:
       docker push $(awsImageName)
       docker push $(awsCreatorName)
     displayName: 'Push docker containers for aws creator'    
+
 - job: PublishAzure
   dependsOn: PublishCore
   displayName: 'Build azure container'
