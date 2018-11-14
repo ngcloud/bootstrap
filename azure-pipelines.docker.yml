@@ -1,5 +1,3 @@
-pool:
-  vmImage: 'Ubuntu 16.04'
 
 variables:
   toolsVersion: '1.0.0'
@@ -10,8 +8,28 @@ variables:
   azureCreatorName: 'ngcloud/azure-creator'
   notaryVersion: '0.6.1'
 
+pr:
+- master
+- release/*
+- epic/*
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - feature/*
+    - epic/*
+    - release/*
+    exclude:
+    - test/*
+    - temp/*
+
 jobs:
-- job: BuildCore     
+- job: BuildCore
+  displayName: 'Build core container'
+  pool:
+    vmImage: 'Ubuntu 16.04'
   steps:
   - script: |
       DATE=$(date '+%d/%m/%Y %H:%M:%S')
@@ -21,6 +39,9 @@ jobs:
     displayName: 'NgCloud core tools docker build'
 - job: BuildAWS
   dependsOn: BuildCore
+  displayName: 'Build aws container'
+  pool:
+    vmImage: 'Ubuntu 16.04'
   steps:
   - script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-aws -t $(awsImageName) --no-cache .
     displayName: 'NgCloud aws tools docker build'
@@ -28,6 +49,9 @@ jobs:
     displayName: 'NgCloud Creator docker build (AWS)'
 - job: BuildAzure
   dependsOn: BuildCore
+  displayName: 'Build azure container'
+  pool:
+    vmImage: 'Ubuntu 16.04'
   steps:
   - script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-azure -t $(azureImageName) --no-cache .
     displayName: 'NgCloud azure tools docker build'
@@ -35,6 +59,9 @@ jobs:
     displayName: 'NgCloud Creator docker build (Azure)'  
 
 - job: PublishCore
+  displayName: 'Publish core container'
+  pool:
+    vmImage: 'Ubuntu 16.04'
   dependsOn: BuildCore
   steps:
   - script: |
@@ -46,6 +73,9 @@ jobs:
     pswd: $(dockerPassword)
 - job: PublishAWS
   dependsOn: PublishCore
+  displayName: 'Publish AWS container'
+  pool:
+    vmImage: 'Ubuntu 16.04'
   steps:
   - script: |  
       docker push $(awsImageName)
@@ -53,6 +83,9 @@ jobs:
     displayName: 'Push docker containers for aws creator'    
 - job: PublishAzure
   dependsOn: PublishCore
+  displayName: 'Build azure container'
+  pool:
+    vmImage: 'Ubuntu 16.04'
   steps:
   - script: |  
       docker push $(azureImageName)
