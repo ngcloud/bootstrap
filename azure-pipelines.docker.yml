@@ -26,7 +26,7 @@ trigger:
 
 jobs:
 - job: BuildCore
-  displayName: 'Build and push core container'
+  displayName: 'Build core tools'
   pool:
     vmImage: 'Ubuntu 16.04'
   steps:  
@@ -42,7 +42,7 @@ jobs:
 
 - job: BuildAWS
   dependsOn: BuildCore
-  displayName: 'Build aws container'
+  displayName: 'Build aws tools'
   pool:
     vmImage: 'Ubuntu 16.04'
   steps:
@@ -61,7 +61,7 @@ jobs:
 
 - job: BuildAzure
   dependsOn: BuildCore
-  displayName: 'Build azure container'
+  displayName: 'Build azure tools'
   pool:
     vmImage: 'Ubuntu 16.04'
   steps:
