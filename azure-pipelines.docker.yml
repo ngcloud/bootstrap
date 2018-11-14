@@ -9,29 +9,52 @@ variables:
   awsCreatorName: 'ngcloud/creator'
   azureCreatorName: 'ngcloud/azure-creator'
   notaryVersion: '0.6.1'
-steps:
-- script: |
-    DATE=$(date '+%d/%m/%Y %H:%M:%S')
-    echo "##vso[task.setvariable variable=buildDate;]$DATE"
-  displayName: 'Set build variables'  
-- script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-tools -t $(coreImageName) --no-cache .
-  displayName: 'NgCloud core tools docker build'
-- script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-aws -t $(awsImageName) --no-cache .
-  displayName: 'NgCloud aws tools docker build'
-- script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-azure -t $(azureImageName) --no-cache .
-  displayName: 'NgCloud azure tools docker build'
-- script: docker build --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile -t $(awsCreatorName) --no-cache .
-  displayName: 'NgCloud Creator docker build (AWS)'
-- script: docker build --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-azcreator -t $(azureCreatorName) --no-cache .
-  displayName: 'NgCloud Creator docker build (Azure)'  
-- script: |
-    docker login -u $(dockerId) -p $pswd
-    docker push $(coreImageName)
-    docker push $(awsImageName)
-    docker push $(azureImageName)
-    docker push $(awsCreatorName)
-    docker push $(azureCreatorName)
+
+jobs:
+- job: BuildCore     
+  steps:
+  - script: |
+      DATE=$(date '+%d/%m/%Y %H:%M:%S')
+      echo "##vso[task.setvariable variable=buildDate;]$DATE"
+    displayName: 'Set build variables'  
+  - script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-tools -t $(coreImageName) --no-cache .
+    displayName: 'NgCloud core tools docker build'
+- job: BuildAWS
+  dependsOn: BuildCore
+  steps:
+  - script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-aws -t $(awsImageName) --no-cache .
+    displayName: 'NgCloud aws tools docker build'
+  - script: docker build --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile -t $(awsCreatorName) --no-cache .
+    displayName: 'NgCloud Creator docker build (AWS)'
+- job: BuildAzure
+  dependsOn: BuildCore
+  steps:
+  - script: docker build --build-arg aquaToken=$(aquaToken) --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-azure -t $(azureImageName) --no-cache .
+    displayName: 'NgCloud azure tools docker build'
+  - script: docker build --build-arg CLI_VERSION=$(toolsVersion) --build-arg BUILD_DATE="$(buildDate)" -f Dockerfile-azcreator -t $(azureCreatorName) --no-cache .
+    displayName: 'NgCloud Creator docker build (Azure)'  
+
+- job: PublishCore
+  dependsOn: BuildCore
+  steps:
+  - script: |
+      docker login -u $(dockerId) -p $pswd
+      docker push $(coreImageName)
+    displayName: 'Push docker containers for core cloud tools'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   env:
-    pswd: $(dockerPassword)  
-  displayName: 'Push docker containers for master branch builds'
+    pswd: $(dockerPassword)
+- job: PublishAWS
+  dependsOn: PublishCore
+  steps:
+  - script: |  
+      docker push $(awsImageName)
+      docker push $(awsCreatorName)
+    displayName: 'Push docker containers for aws creator'    
+- job: PublishAzure
+  dependsOn: PublishCore
+  steps:
+  - script: |  
+      docker push $(azureImageName)
+      docker push $(azureCreatorName)  
+    displayName: 'Push docker containers for azure creator'

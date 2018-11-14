@@ -40,4 +40,3 @@ RUN curl -LO https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${
   && unzip terraform_${TF_VERSION}_linux_amd64.zip -d /usr/local/bin \
   && chmod +x /usr/local/bin/terraform \
   && rm terraform_${TF_VERSION}_linux_amd64.zip
-
