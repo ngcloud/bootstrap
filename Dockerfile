@@ -25,4 +25,4 @@ RUN cd /home/ngcloud \
   && git clone https://github.com/ngcloud/bootstrap.git \
   && chmod +x /home/ngcloud/bootstrap/scripts/*.sh
 
-CMD ["/usr/bin/bash"]
+CMD ["/bin/bash"]

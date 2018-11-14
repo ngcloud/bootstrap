@@ -18,7 +18,7 @@ LABEL maintainer="ngCloud" \
 
 ENV TF_VERSION=0.11.10
 
-RUN apk --update add --no-cache python3 py3-pip zip tar make bash wget curl jq git openssl openssh-client \
+RUN apk --update add --no-cache python3 py3-pip zip tar make bash bash-completion wget curl jq git openssl openssh-client \
     && rm -rf /var/lib/apt/lists/*
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 RUN pip3 install --upgrade pip

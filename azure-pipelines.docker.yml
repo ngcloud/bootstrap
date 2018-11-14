@@ -23,7 +23,10 @@ trigger:
     exclude:
     - test/*
     - temp/*
-
+  paths:
+    exclude:
+    - docs/*
+    - README.md
 jobs:
 - job: BuildCore
   displayName: 'Build core tools'

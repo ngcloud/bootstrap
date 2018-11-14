@@ -6,6 +6,8 @@ ngcloud is coming soon
 
 ## Quick start
 
+### AWS using kops
+
 Bootstrap scripts are available as a docker image. Simply pull the image and run the image by mounting your ssh and aws credentials directory.
 
 ```bash
@@ -24,6 +26,13 @@ cd ~/bootstrap/scripts
 
 ```bash
 ./aws-setup.sh iam-auth
+```
+
+### Azure with AKS
+
+```bash
+docker pull ngcloud/azure-creator
+docker run -it --name ngcloud-creator -v ~/.azure:/home/ngcloud/.azure ngcloud/azure-creator
 ```
 
 ## Power users
