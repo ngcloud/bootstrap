@@ -18,10 +18,10 @@ LABEL maintainer="ngCloud" \
       org.label-schema.vcs-url="https://github.com/ngcloud/bootstrap.git" \
       org.label-schema.docker.cmd="docker run -it --name ngcloud-creator -v ~/.azure:/home/ngcloud/.azure ngcloud/azure-creator"
 
-RUN apk add --no-cache libffi-dev musl-dev
-
 # Install azure cli
-RUN curl -L https://aka.ms/InstallAzureCli | bash
+RUN apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make \
+  && pip3 install azure-cli \
+  && apk del --purge build
 
 # Scan with aqua
 RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \
