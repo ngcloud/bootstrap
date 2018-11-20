@@ -28,7 +28,7 @@ cd ~/bootstrap/scripts
 ./aws-setup.sh iam-auth
 ```
 
-### Azure with AKS
+### Azure using acs-engine
 
 ```bash
 docker pull ngcloud/azure-creator
