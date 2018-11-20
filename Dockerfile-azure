@@ -18,10 +18,18 @@ LABEL maintainer="ngCloud" \
       org.label-schema.vcs-url="https://github.com/ngcloud/bootstrap.git" \
       org.label-schema.docker.cmd="docker run -it --name ngcloud-creator -v ~/.azure:/home/ngcloud/.azure ngcloud/azure-creator"
 
+ENV ACS_VERSION=0.25.3
+
 # Install azure cli
 RUN apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make \
   && pip3 install azure-cli \
   && apk del --purge build
+
+# Install acs-engine
+RUN curl -LO https://github.com/Azure/acs-engine/releases/download/v${ACS_VERSION}/acs-engine-v${ACS_VERSION}-linux-amd64.zip \
+  && unzip acs-engine-v${ACS_VERSION}-linux-amd64.zip -d /usr/local/bin \
+  && chmod +x /usr/local/bin/acs-engine \
+  && rm acs-engine-v${ACS_VERSION}-linux-amd64.zip
 
 # Scan with aqua
 RUN curl "https://get.aquasec.com/microscanner" -o "/usr/local/bin/microscanner" \

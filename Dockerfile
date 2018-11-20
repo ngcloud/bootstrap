@@ -14,7 +14,7 @@ LABEL maintainer="ngCloud" \
       org.label-schema.usage="https://github.com/ngcloud/bootstrap" \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/ngcloud/bootstrap.git" \
-      org.label-schema.docker.cmd="docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
+      org.label-schema.docker.cmd="docker run --rm -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator"
 
 # Run as ngcloud user
 RUN adduser -u 1001 -D -h /home/ngcloud -s /bin/bash ngcloud

@@ -12,7 +12,7 @@ Bootstrap scripts are available as a docker image. Simply pull the image and run
 
 ```bash
 docker pull ngcloud/creator # or docker pull quay.io/ngcloud/creator
-docker run -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator
+docker run --rm -it --name ngcloud-creator -v ~/.aws:/home/ngcloud/.aws -v ~/.ssh:/home/ngcloud/.ssh ngcloud/creator
 ```
 
 Continue with the cloud creation from within the docker bash shell
@@ -32,7 +32,7 @@ cd ~/bootstrap/scripts
 
 ```bash
 docker pull ngcloud/azure-creator
-docker run -it --name ngcloud-creator -v ~/.azure:/home/ngcloud/.azure ngcloud/azure-creator
+docker run --rm -it --name ngcloud-creator -v ~/.azure:/home/ngcloud/.azure ngcloud/azure-creator
 ```
 
 ## Power users
