@@ -28,6 +28,7 @@ RUN apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make
 # Install acs-engine
 RUN curl -LO https://github.com/Azure/acs-engine/releases/download/v${ACS_VERSION}/acs-engine-v${ACS_VERSION}-linux-amd64.zip \
   && unzip acs-engine-v${ACS_VERSION}-linux-amd64.zip -d /usr/local/bin \
+  && mv /usr/local/bin/acs-engine-v${ACS_VERSION}-linux-amd64/acs-engine /usr/local/bin/acs-engine \
   && chmod +x /usr/local/bin/acs-engine \
   && rm acs-engine-v${ACS_VERSION}-linux-amd64.zip
 
