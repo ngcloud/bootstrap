@@ -1,8 +1,3 @@
-secrets:
-- kmsKeyName: projects/glassy-courage-253518/locations/europe-west2/keyRings/BUILD_KEYS/cryptoKeys/SCAN_TOKEN
-  secretEnv:
-    AQUA_TOKEN: CiQACnvJRJoq+On+WdAC919s8uX+yYtBSUCblbzB3uVYDEQ0wpESOQBUe0+IUsQ5HLLXD2kZFTtrkLrKmTXnnInbOEzQ/t+uXHNPzU2mFOf6AHPr3/8sVgd6owzfmjZGcA==
-
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build',
@@ -19,17 +14,15 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'docker build --build-arg CLI_VERSION=${_TOOLS_VERSION} --build-arg BUILD_DATE=$COMMIT_SHA --build-arg aquaToken=$$AQUA_TOKEN -f Dockerfile-aws -t gcr.io/$PROJECT_ID/${_AWS_IMAGE_NAME} .']
-  secretEnv: ['AQUA_TOKEN']
+  args: ['-c', 'docker build --build-arg CLI_VERSION=${_TOOLS_VERSION} --build-arg BUILD_DATE=$COMMIT_SHA --build-arg aquaToken=${_AQUA_TOKEN} -f Dockerfile-aws -t gcr.io/$PROJECT_ID/${_AWS_IMAGE_NAME} .']
   id: 'build-aws'
   waitFor:
     - 'build-core'
 
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'docker build --build-arg CLI_VERSION=${_TOOLS_VERSION} --build-arg BUILD_DATE=$COMMIT_SHA --build-arg aquaToken=$$AQUA_TOKEN -f Dockerfile-azure -t gcr.io/$PROJECT_ID/${_AZURE_IMAGE_NAME} .']
+  args: ['-c', 'docker build --build-arg CLI_VERSION=${_TOOLS_VERSION} --build-arg BUILD_DATE=$COMMIT_SHA --build-arg aquaToken=${_AQUA_TOKEN} -f Dockerfile-azure -t gcr.io/$PROJECT_ID/${_AZURE_IMAGE_NAME} .']
   id: 'build-azure'
-  secretEnv: ['AQUA_TOKEN']
   waitFor:
     - 'build-core'
 
@@ -63,13 +56,26 @@ steps:
   waitFor:
     - 'build-azure'
 
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+    'gcr.io/$PROJECT_ID/${_AWS_CREATOR_NAME}'
+  ]
+  id: 'push-aws-creator'
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',
+    'gcr.io/$PROJECT_ID/${_AZURE_CREATOR_NAME}'
+  ]
+  id: 'push-azure-creator'
+
 substitutions:
   _TOOLS_VERSION: '1.0.0'
-  _CORE_IMAGE_NAME: 'ngcloud/cloud-tools'
-  _AWS_IMAGE_NAME: 'ngcloud/aws-tools'
-  _AZURE_IMAGE_NAME: 'ngcloud/azure-tools'
-  _AWS_CREATOR_NAME: 'ngcloud/creator'
-  _AZURE_CREATOR_NAME: 'ngcloud/azure-creator'
+  _CORE_IMAGE_NAME: 'ngcloud/cloud-tools:$SHORT_SHA'
+  _AWS_IMAGE_NAME: 'ngcloud/aws-tools:$SHORT_SHA'
+  _AZURE_IMAGE_NAME: 'ngcloud/azure-tools:$SHORT_SHA'
+  _AWS_CREATOR_NAME: 'ngcloud/creator:$SHORT_SHA'
+  _AZURE_CREATOR_NAME: 'ngcloud/azure-creator:$SHORT_SHA'
+  _AQUA_TOKEN: ''
 images: [
   'gcr.io/$PROJECT_ID/${_CORE_IMAGE_NAME}',
   'gcr.io/$PROJECT_ID/${_AWS_IMAGE_NAME}',
