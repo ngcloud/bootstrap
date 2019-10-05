@@ -37,7 +37,7 @@ steps:
          '-t',
          'gcr.io/$PROJECT_ID/${_AWS_CREATOR_NAME}',
          '.']
-  id: 'build-awscreator'
+  id: 'build-aws-creator'
   waitFor:
     - 'build-aws'
 
@@ -52,7 +52,7 @@ steps:
          '-t',
          'gcr.io/$PROJECT_ID/${_AZURE_CREATOR_NAME}',
          '.']
-  id: 'build-azurecreator'
+  id: 'build-azure-creator'
   waitFor:
     - 'build-azure'
 
