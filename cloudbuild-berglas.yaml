@@ -12,6 +12,23 @@ steps:
          '.']
   id: 'build-core'
 
+- id: berglas
+  name: gcr.io/berglas/berglas
+  env:
+  - SCAN_TOKEN=berglas://${_BUCKET_ID}/scan-token?destination=/secrets/scan-token
+  args: ["exec", "--local", "--", "/bin/sh"]
+  volumes:
+  - name: secrets
+    path: /secrets
+
+- id: show-tokens
+  name: launcher.gcr.io/google/ubuntu16_04
+  entrypoint: "/bin/cat"
+  args: ["/secrets/scan-token"]
+  volumes:
+  - name: secrets
+    path: /secrets
+
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
   args: ['-c', 'docker build --build-arg CLI_VERSION=${_TOOLS_VERSION} --build-arg BUILD_DATE=$COMMIT_SHA --build-arg aquaToken=${_AQUA_TOKEN} -f Dockerfile-aws -t gcr.io/$PROJECT_ID/${_AWS_IMAGE_NAME} .']
@@ -76,6 +93,7 @@ substitutions:
   _AWS_CREATOR_NAME: 'ngcloud/creator'
   _AZURE_CREATOR_NAME: 'ngcloud/azure-creator'
   _AQUA_TOKEN: ''
+  _BUCKET_ID: 'projects/glassy-courage-253518/locations/europe-west2/keyRings/NG_BERGLAS/cryptoKeys/berglas-key'
 images: [
   'gcr.io/$PROJECT_ID/${_CORE_IMAGE_NAME}',
   'gcr.io/$PROJECT_ID/${_AWS_IMAGE_NAME}',
